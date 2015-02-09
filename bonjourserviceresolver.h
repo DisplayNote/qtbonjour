@@ -1,6 +1,7 @@
 /*
 Copyright (c) 2007, Trenton Schulz
 Copyright (c) 2009-2011, Stefan Hacker
+Copyright (C) 2009-2011, Thorvald Natvig <thorvald@natvig.com>
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -27,47 +28,47 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef BONJOUR_SERVICE_BROWSER_H_
-#define BONJOUR_SERVICE_BROWSER_H_
+#pragma once
 
+// Own includes
+#include "bonjourrecord.h"
+
+// libdnssd
 #include <dns_sd.h>
 
+// Qt includes
+#include <QtCore/QMap>
 #include <QtCore/QObject>
-
-#include "BonjourRecord.h"
-
-#include "qtbonjour_export.h"
 
 class QSocketNotifier;
 
-class QTBONJOUR_EXPORT BonjourServiceBrowser : public QObject {
+class BonjourServiceResolver : public QObject {
 		Q_OBJECT
+	protected:
+		struct ResolveRecord {
+			BonjourRecord record;
+			BonjourServiceResolver *bsr;
+			DNSServiceRef dnssref;
+			QSocketNotifier *bonjourSocket;
+			int bonjourPort;
+			ResolveRecord(const BonjourRecord &, BonjourServiceResolver *);
+			~ResolveRecord();
+		};
+
+		QMap<int, ResolveRecord *> qmResolvers;
 	public:
-		BonjourServiceBrowser(QObject *parent = 0);
-		~BonjourServiceBrowser();
-		void browseForServiceType(const QString &serviceType);
-		inline QList<BonjourRecord> currentRecords() const {
-			return bonjourRecords;
-		}
-		inline QString serviceType() const {
-			return browsingType;
-		}
+		BonjourServiceResolver(QObject *parent);
+		~BonjourServiceResolver();
 
+		void resolveBonjourRecord(const BonjourRecord &record);
 	signals:
-		void currentBonjourRecordsChanged(const QList<BonjourRecord> &list);
-		void error(DNSServiceErrorType err);
-
+		void bonjourRecordResolved(BonjourRecord record, QString hostname, int port);
+		void error(BonjourRecord record, DNSServiceErrorType error);
 	private slots:
-		void bonjourSocketReadyRead();
-
+		void bonjourSocketReadyRead(int);
 	private:
-		static void DNSSD_API bonjourBrowseReply(DNSServiceRef , DNSServiceFlags flags, quint32,
-		        DNSServiceErrorType errorCode, const char *serviceName,
-		        const char *regType, const char *replyDomain, void *context);
-		DNSServiceRef dnssref;
-		QSocketNotifier *bonjourSocket;
-		QList<BonjourRecord> bonjourRecords;
-		QString browsingType;
+		static void DNSSD_API bonjourResolveReply(DNSServiceRef sdRef, DNSServiceFlags flags,
+		        quint32 interfaceIndex, DNSServiceErrorType errorCode,
+		        const char *fullName, const char *hosttarget, quint16 port,
+		        quint16 txtLen, const char *txtRecord, void *context);
 };
-
-#endif //BONJOUR_SERVICE_BROWSER_H_

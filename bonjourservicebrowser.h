@@ -27,45 +27,44 @@ OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef BONJOUR_SERVICE_REGISTER_H_
-#define BONJOUR_SERVICE_REGISTER_H_
+#pragma once
 
-// Bonjour flags
+// Own includes
+#include "bonjourrecord.h"
+
+// libdnssd
 #include <dns_sd.h>
+
+// Qt includes
 #include <QtCore/QObject>
 
-#include "BonjourRecord.h"
-
-#include "qtbonjour_export.h"
-
 class QSocketNotifier;
-
-class QTBONJOUR_EXPORT BonjourServiceRegister : public QObject {
+class BonjourServiceBrowser : public QObject {
 		Q_OBJECT
 	public:
-		BonjourServiceRegister(QObject *parent = 0);
-		~BonjourServiceRegister();
-
-		void registerService(const BonjourRecord &record, quint16 servicePort);
-		inline BonjourRecord registeredRecord() const {
-			return finalRecord;
+		BonjourServiceBrowser(QObject *parent = 0);
+		~BonjourServiceBrowser();
+		void browseForServiceType(const QString &serviceType);
+		inline QList<BonjourRecord> currentRecords() const {
+			return bonjourRecords;
+		}
+		inline QString serviceType() const {
+			return browsingType;
 		}
 
 	signals:
-		void error(DNSServiceErrorType error);
-		void serviceRegistered(const BonjourRecord &record);
+		void currentBonjourRecordsChanged(const QList<BonjourRecord> &list);
+		void error(DNSServiceErrorType err);
 
 	private slots:
 		void bonjourSocketReadyRead();
 
 	private:
-		static void DNSSD_API bonjourRegisterService(DNSServiceRef sdRef, DNSServiceFlags,
-		        DNSServiceErrorType errorCode, const char *name,
-		        const char *regtype, const char *domain,
-		        void *context);
+		static void DNSSD_API bonjourBrowseReply(DNSServiceRef , DNSServiceFlags flags, quint32,
+		        DNSServiceErrorType errorCode, const char *serviceName,
+		        const char *regType, const char *replyDomain, void *context);
 		DNSServiceRef dnssref;
 		QSocketNotifier *bonjourSocket;
-		BonjourRecord finalRecord;
+		QList<BonjourRecord> bonjourRecords;
+		QString browsingType;
 };
-
-#endif //BONJOUR_SERVICE_REGISTER_H_
