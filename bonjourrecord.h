@@ -31,6 +31,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Qt includes
 #include <QtCore/QMetaType>
 #include <QtCore/QString>
+#include <QtCore/QMap>
 
 class BonjourRecord {
 	public:
@@ -45,6 +46,9 @@ class BonjourRecord {
 		QString serviceName;
 		QString registeredType;
 		QString replyDomain;
+
+        QMap<QString,QString> txtRecord;
+
 		bool operator==(const BonjourRecord &other) const {
 			return serviceName == other.serviceName
 			       && registeredType == other.registeredType

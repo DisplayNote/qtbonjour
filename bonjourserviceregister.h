@@ -45,7 +45,7 @@ class BonjourServiceRegister : public QObject {
 		BonjourServiceRegister(QObject *parent = 0);
 		~BonjourServiceRegister();
 
-		void registerService(const BonjourRecord &record, quint16 servicePort);
+        void registerService(const BonjourRecord &record, quint16 servicePort, int niIndex);
 		inline BonjourRecord registeredRecord() const {
 			return finalRecord;
 		}
@@ -62,6 +62,7 @@ class BonjourServiceRegister : public QObject {
 		        DNSServiceErrorType errorCode, const char *name,
 		        const char *regtype, const char *domain,
 		        void *context);
+
 		DNSServiceRef dnssref;
 		QSocketNotifier *bonjourSocket;
 		BonjourRecord finalRecord;
