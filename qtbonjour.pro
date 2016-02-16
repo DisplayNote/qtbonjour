@@ -1,5 +1,9 @@
 TEMPLATE = lib
-#CONFIG += staticlib
+
+win32{
+CONFIG += staticlib
+}
+
 TARGET = qtbonjour
 
 win32 {
