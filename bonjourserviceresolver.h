@@ -34,7 +34,11 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "bonjourrecord.h"
 
 // libdnssd
+#if defined(Q_OS_LINUX)
+#include <avahi-compat-libdns_sd/dns_sd.h>
+#else
 #include <dns_sd.h>
+#endif
 
 // Qt includes
 #include <QtCore/QMap>
@@ -57,7 +61,7 @@ class BonjourServiceResolver : public QObject {
 
 		QMap<int, ResolveRecord *> qmResolvers;
 	public:
-		BonjourServiceResolver(QObject *parent);
+                BonjourServiceResolver(QObject *parent = 0);
 		~BonjourServiceResolver();
 
 		void resolveBonjourRecord(const BonjourRecord &record);

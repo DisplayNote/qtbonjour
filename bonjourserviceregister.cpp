@@ -77,7 +77,7 @@ void BonjourServiceRegister::registerService(const BonjourRecord &record, quint1
         }
     }
 
-    DNSServiceErrorType err = DNSServiceRegister(&dnssref, 4, niIndex,
+    DNSServiceErrorType err = DNSServiceRegister(&dnssref, 0, niIndex,
                               record.serviceName.toUtf8().constData(),
                               record.registeredType.toUtf8().constData(),
                               NULL,

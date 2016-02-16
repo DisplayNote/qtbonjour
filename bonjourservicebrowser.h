@@ -33,8 +33,11 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "bonjourrecord.h"
 
 // libdnssd
+#if defined(Q_OS_LINUX)
+#include <avahi-compat-libdns_sd/dns_sd.h>
+#else
 #include <dns_sd.h>
-
+#endif
 
 // Qt includes
 #include <QtCore/QObject>
