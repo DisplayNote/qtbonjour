@@ -73,7 +73,10 @@ void BonjourServiceRegister::registerService(const BonjourRecord &record, quint1
             if (err != kDNSServiceErr_NoError) {
                 TXTRecordDeallocate(&txtRecord);
                 if (txt != nullptr) delete[] txt;
+
                 emit error(err);
+
+                return;
             }
             txtIt++;
         }
@@ -89,14 +92,10 @@ void BonjourServiceRegister::registerService(const BonjourRecord &record, quint1
                               &bonjourRegisterService, this);
 
     if (err != kDNSServiceErr_NoError) {
-        TXTRecordDeallocate(&txtRecord);
-        if (txt != nullptr) delete[] txt;
         emit error(err);
     } else {
 		int sockfd = DNSServiceRefSockFD(dnssref);
-		if (sockfd == -1) {
-            TXTRecordDeallocate(&txtRecord);
-            if (txt != nullptr) delete[] txt;
+        if (sockfd == -1) {
 			emit error(kDNSServiceErr_Invalid);
 		} else {
 			bonjourSocket = new QSocketNotifier(sockfd, QSocketNotifier::Read, this);
