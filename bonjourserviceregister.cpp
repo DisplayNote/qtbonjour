@@ -58,19 +58,21 @@ void BonjourServiceRegister::registerService(const BonjourRecord &record, quint1
    }
 #endif
 
-
     //Get TXTRecords from BonjourRecord
     TXTRecordRef txtRecord;
+    char * txt = nullptr;
     if (record.txtRecord.count() > 0) {
-        char txt[255];
-        TXTRecordCreate(&txtRecord, 255, &txt);
+        txt = new char[256];
+        TXTRecordCreate(&txtRecord, 256, txt);
         QMap<QString, QString>::const_iterator txtIt = record.txtRecord.begin();
         DNSServiceErrorType err = kDNSServiceErr_NoError;
         while(txtIt != record.txtRecord.end()) {
-            err = TXTRecordSetValue(&txtRecord, txtIt.key().toStdString().c_str(),
-                              txtIt.value().length(), txtIt.value().toStdString().c_str());
+            err = TXTRecordSetValue(&txtRecord, txtIt.key().toUtf8().constData(),
+                              txtIt.value().length(), txtIt.value().toUtf8().constData());
 
             if (err != kDNSServiceErr_NoError) {
+                TXTRecordDeallocate(&txtRecord);
+                if (txt != nullptr) delete[] txt;
                 emit error(err);
             }
             txtIt++;
@@ -86,17 +88,24 @@ void BonjourServiceRegister::registerService(const BonjourRecord &record, quint1
                               TXTRecordGetLength(&txtRecord), TXTRecordGetBytesPtr(&txtRecord),
                               &bonjourRegisterService, this);
 
-	if (err != kDNSServiceErr_NoError) {
-		emit error(err);
-	} else {
+    if (err != kDNSServiceErr_NoError) {
+        TXTRecordDeallocate(&txtRecord);
+        if (txt != nullptr) delete[] txt;
+        emit error(err);
+    } else {
 		int sockfd = DNSServiceRefSockFD(dnssref);
 		if (sockfd == -1) {
+            TXTRecordDeallocate(&txtRecord);
+            if (txt != nullptr) delete[] txt;
 			emit error(kDNSServiceErr_Invalid);
 		} else {
 			bonjourSocket = new QSocketNotifier(sockfd, QSocketNotifier::Read, this);
 			connect(bonjourSocket, SIGNAL(activated(int)), this, SLOT(bonjourSocketReadyRead()));
 		}
 	}
+
+    TXTRecordDeallocate(&txtRecord);
+    if (txt != nullptr) delete[] txt;
 }
 
 
