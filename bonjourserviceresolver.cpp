@@ -34,6 +34,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QtCore/QSocketNotifier>
 #include <QtCore/QtEndian>
 
+#include <QDebug>
+
 BonjourServiceResolver::ResolveRecord::ResolveRecord(const BonjourRecord &r, BonjourServiceResolver *p) : record(r), bsr(p), dnssref(NULL), bonjourSocket(NULL), bonjourPort(-1) {
 }
 
@@ -88,11 +90,27 @@ void BonjourServiceResolver::bonjourSocketReadyRead(int sockfd) {
 
 }
 
+QMap<QString,QString> BonjourServiceResolver::fillMap(QList<QByteArray> txtElements) {
+    QMap<QString, QString> map;
+    for (QByteArray txtElement: txtElements) {
+        if (!txtElement.isEmpty()) {
+            if (txtElement.contains(0x04)) {
+                QList<QByteArray> lastElements = txtElement.split(0x04);
+                 map.unite(fillMap(lastElements));
+            } else {
+                QList<QByteArray> txtPair = txtElement.split('=');
+                map[txtPair.first()] = txtPair.last();
+            }
+        }
+    }
+
+    return map;
+}
 
 void BonjourServiceResolver::bonjourResolveReply(DNSServiceRef, DNSServiceFlags ,
         quint32 , DNSServiceErrorType errorCode,
-        const char *, const char *hosttarget, quint16 port,
-        quint16 , const char *, void *context) {
+        const char * , const char *hosttarget, quint16 port,
+        quint16 txtLen, const char * txtRecord, void *context) {
 	ResolveRecord *rr = static_cast<ResolveRecord *>(context);
 	rr->bsr->qmResolvers.remove(DNSServiceRefSockFD(rr->dnssref));
 
@@ -101,6 +119,21 @@ void BonjourServiceResolver::bonjourResolveReply(DNSServiceRef, DNSServiceFlags 
 		return;
 	}
 	rr->bonjourPort = qFromBigEndian<quint16>(port);
+
+    //TODO: Use native API for TXTRecords
+//    uint8_t size;
+//        char * j = (char *)TXTRecordGetValuePtr(txtLen, txtRecord, "ip", &size);
+//        std::string miIp(j, size);
+//        qDebug() << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << QString::fromStdString(miIp);
+
+    if (txtLen > 0) {
+
+        QByteArray txtData(txtRecord, txtLen);
+
+        QList<QByteArray>  txtElements = txtData.split(0x0e);
+        rr->record.txtRecord = fillMap(txtElements);
+    }
+
 	emit rr->bsr->bonjourRecordResolved(rr->record, QString::fromUtf8(hosttarget), rr->bonjourPort);
 	delete rr;
 }
