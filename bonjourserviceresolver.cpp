@@ -90,23 +90,6 @@ void BonjourServiceResolver::bonjourSocketReadyRead(int sockfd) {
 
 }
 
-QMap<QString,QString> BonjourServiceResolver::fillMap(QList<QByteArray> txtElements) {
-    QMap<QString, QString> map;
-    for (QByteArray txtElement: txtElements) {
-        if (!txtElement.isEmpty()) {
-            if (txtElement.contains(0x04)) {
-                QList<QByteArray> lastElements = txtElement.split(0x04);
-                 map.unite(fillMap(lastElements));
-            } else {
-                QList<QByteArray> txtPair = txtElement.split('=');
-                map[txtPair.first()] = txtPair.last();
-            }
-        }
-    }
-
-    return map;
-}
-
 void BonjourServiceResolver::bonjourResolveReply(DNSServiceRef, DNSServiceFlags ,
         quint32 , DNSServiceErrorType errorCode,
         const char * , const char *hosttarget, quint16 port,
@@ -117,21 +100,30 @@ void BonjourServiceResolver::bonjourResolveReply(DNSServiceRef, DNSServiceFlags 
 	if (errorCode != kDNSServiceErr_NoError) {
 		emit rr->bsr->error(rr->record, errorCode);
 		return;
-	}
+    }
+
 	rr->bonjourPort = qFromBigEndian<quint16>(port);
 
-    //TODO: Use native API for TXTRecords
-//    uint8_t size;
-//        char * j = (char *)TXTRecordGetValuePtr(txtLen, txtRecord, "ip", &size);
-//        std::string miIp(j, size);
-//        qDebug() << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << QString::fromStdString(miIp);
-
     if (txtLen > 0) {
+        uint16_t keyLen = 256;
+        char * key = new char[keyLen];
+        uint8_t valueLen;
+        char * value;
 
-        QByteArray txtData(txtRecord, txtLen);
+        uint16_t keys = TXTRecordGetCount(txtLen, txtRecord);
+        for (uint16_t index = 0; index != keys; index++) {
+            keyLen = 256;
+            if (TXTRecordGetItemAtIndex(txtLen, txtRecord, index, keyLen, key, &valueLen, (const void **)&value) != kDNSServiceErr_NoError) {
+                delete[] key;
 
-        QList<QByteArray>  txtElements = txtData.split(0x0e);
-        rr->record.txtRecord = fillMap(txtElements);
+                emit rr->bsr->error(rr->record, errorCode);
+
+                return;
+            }
+            rr->record.txtRecord.insert(QString::fromStdString(std::string(key)),
+                                        QString::fromStdString(std::string(value, valueLen)));
+        }
+        delete[] key;
     }
 
 	emit rr->bsr->bonjourRecordResolved(rr->record, QString::fromUtf8(hosttarget), rr->bonjourPort);

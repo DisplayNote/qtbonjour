@@ -71,7 +71,6 @@ class BonjourServiceResolver : public QObject {
 	private slots:
 		void bonjourSocketReadyRead(int);
 	private:
-        static QMap<QString,QString> fillMap(QList<QByteArray> txtElements);
 		static void DNSSD_API bonjourResolveReply(DNSServiceRef sdRef, DNSServiceFlags flags,
 		        quint32 interfaceIndex, DNSServiceErrorType errorCode,
 		        const char *fullName, const char *hosttarget, quint16 port,
