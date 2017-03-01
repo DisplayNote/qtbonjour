@@ -74,7 +74,7 @@ void BonjourServiceRegister::registerService(const BonjourRecord &record, quint1
                 TXTRecordDeallocate(&txtRecord);
                 if (txt != nullptr) delete[] txt;
 
-                emit error(err);
+                Q_EMIT error(err);
 
                 return;
             }
@@ -92,11 +92,11 @@ void BonjourServiceRegister::registerService(const BonjourRecord &record, quint1
                               &bonjourRegisterService, this);
 
     if (err != kDNSServiceErr_NoError) {
-        emit error(err);
+        Q_EMIT error(err);
     } else {
 		int sockfd = DNSServiceRefSockFD(dnssref);
         if (sockfd == -1) {
-			emit error(kDNSServiceErr_Invalid);
+			Q_EMIT error(kDNSServiceErr_Invalid);
 		} else {
 			bonjourSocket = new QSocketNotifier(sockfd, QSocketNotifier::Read, this);
 			connect(bonjourSocket, SIGNAL(activated(int)), this, SLOT(bonjourSocketReadyRead()));
@@ -111,7 +111,7 @@ void BonjourServiceRegister::registerService(const BonjourRecord &record, quint1
 void BonjourServiceRegister::bonjourSocketReadyRead() {
 	DNSServiceErrorType err = DNSServiceProcessResult(dnssref);
     if (err != kDNSServiceErr_NoError) {
-		emit error(err);
+		Q_EMIT error(err);
     }
 }
 
@@ -123,11 +123,11 @@ void DNSSD_API BonjourServiceRegister::bonjourRegisterService(DNSServiceRef, DNS
 
     BonjourServiceRegister *serviceRegister = static_cast<BonjourServiceRegister *>(context);
     if (errorCode != kDNSServiceErr_NoError) {
-		emit serviceRegister->error(errorCode);
+		Q_EMIT serviceRegister->error(errorCode);
 	} else {
 		serviceRegister->finalRecord = BonjourRecord(QString::fromUtf8(name),
 		                               QString::fromUtf8(regtype),
 		                               QString::fromUtf8(domain));
-		emit serviceRegister->serviceRegistered(serviceRegister->finalRecord);
+		Q_EMIT serviceRegister->serviceRegistered(serviceRegister->finalRecord);
 	}
 }

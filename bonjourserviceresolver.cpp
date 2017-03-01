@@ -74,7 +74,7 @@ void BonjourServiceResolver::resolveBonjourRecord(const BonjourRecord &record) {
 		}
 	}
 
-	emit error(record, err);
+	Q_EMIT error(record, err);
 	delete rr;
 }
 
@@ -86,7 +86,7 @@ void BonjourServiceResolver::bonjourSocketReadyRead(int sockfd) {
 
 	DNSServiceErrorType err = DNSServiceProcessResult(rr->dnssref);
 	if (err != kDNSServiceErr_NoError)
-		emit error(rr->record, err);
+		Q_EMIT error(rr->record, err);
 
 }
 
@@ -98,7 +98,7 @@ void BonjourServiceResolver::bonjourResolveReply(DNSServiceRef, DNSServiceFlags 
 	rr->bsr->qmResolvers.remove(DNSServiceRefSockFD(rr->dnssref));
 
 	if (errorCode != kDNSServiceErr_NoError) {
-		emit rr->bsr->error(rr->record, errorCode);
+		Q_EMIT rr->bsr->error(rr->record, errorCode);
 		return;
     }
 
@@ -116,7 +116,7 @@ void BonjourServiceResolver::bonjourResolveReply(DNSServiceRef, DNSServiceFlags 
             if (TXTRecordGetItemAtIndex(txtLen, txtRecord, index, keyLen, key, &valueLen, (const void **)&value) != kDNSServiceErr_NoError) {
                 delete[] key;
 
-                emit rr->bsr->error(rr->record, errorCode);
+                Q_EMIT rr->bsr->error(rr->record, errorCode);
 
                 return;
             }
@@ -126,6 +126,6 @@ void BonjourServiceResolver::bonjourResolveReply(DNSServiceRef, DNSServiceFlags 
         delete[] key;
     }
 
-	emit rr->bsr->bonjourRecordResolved(rr->record, QString::fromUtf8(hosttarget), rr->bonjourPort);
+	Q_EMIT rr->bsr->bonjourRecordResolved(rr->record, QString::fromUtf8(hosttarget), rr->bonjourPort);
 	delete rr;
 }

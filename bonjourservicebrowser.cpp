@@ -47,11 +47,11 @@ void BonjourServiceBrowser::browseForServiceType(const QString &serviceType) {
 	DNSServiceErrorType err = DNSServiceBrowse(&dnssref, 0, 0, serviceType.toUtf8().constData(), 0,
 	                          bonjourBrowseReply, this);
 	if (err != kDNSServiceErr_NoError) {
-		emit error(err);
+		Q_EMIT error(err);
 	} else {
 		int sockfd = DNSServiceRefSockFD(dnssref);
 		if (sockfd == -1) {
-			emit error(kDNSServiceErr_Invalid);
+			Q_EMIT error(kDNSServiceErr_Invalid);
 		} else {
 			bonjourSocket = new QSocketNotifier(sockfd, QSocketNotifier::Read, this);
 			connect(bonjourSocket, SIGNAL(activated(int)), this, SLOT(bonjourSocketReadyRead()));
@@ -62,7 +62,7 @@ void BonjourServiceBrowser::browseForServiceType(const QString &serviceType) {
 void BonjourServiceBrowser::bonjourSocketReadyRead() {
 	DNSServiceErrorType err = DNSServiceProcessResult(dnssref);
 	if (err != kDNSServiceErr_NoError)
-		emit error(err);
+		Q_EMIT error(err);
 }
 
 void BonjourServiceBrowser::bonjourBrowseReply(DNSServiceRef , DNSServiceFlags flags,
@@ -71,7 +71,7 @@ void BonjourServiceBrowser::bonjourBrowseReply(DNSServiceRef , DNSServiceFlags f
         const char *replyDomain, void *context) {
 	BonjourServiceBrowser *serviceBrowser = static_cast<BonjourServiceBrowser *>(context);
 	if (errorCode != kDNSServiceErr_NoError) {
-		emit serviceBrowser->error(errorCode);
+		Q_EMIT serviceBrowser->error(errorCode);
 	} else {
 		BonjourRecord bonjourRecord(serviceName, regType, replyDomain);
 		if (flags & kDNSServiceFlagsAdd) {
@@ -81,7 +81,7 @@ void BonjourServiceBrowser::bonjourBrowseReply(DNSServiceRef , DNSServiceFlags f
 			serviceBrowser->bonjourRecords.removeAll(bonjourRecord);
 		}
 		if (!(flags & kDNSServiceFlagsMoreComing)) {
-			emit serviceBrowser->currentBonjourRecordsChanged(serviceBrowser->bonjourRecords);
+			Q_EMIT serviceBrowser->currentBonjourRecordsChanged(serviceBrowser->bonjourRecords);
 		}
 	}
 }
