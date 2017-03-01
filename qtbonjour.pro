@@ -4,6 +4,8 @@ win32{
 CONFIG += staticlib
 }
 
+CONFIG += no_keywords
+
 TARGET = qtbonjour
 
 win32 {
