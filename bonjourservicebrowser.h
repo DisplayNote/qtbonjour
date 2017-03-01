@@ -60,7 +60,7 @@ class BonjourServiceBrowser : public QObject {
 		void currentBonjourRecordsChanged(const QList<BonjourRecord> &list);
 		void error(DNSServiceErrorType err);
 
-	private slots:
+	private Q_SLOTS:
 		void bonjourSocketReadyRead();
 
 	private:

@@ -68,7 +68,7 @@ class BonjourServiceResolver : public QObject {
 	Q_SIGNALS:
 		void bonjourRecordResolved(BonjourRecord record, QString hostname, int port);
 		void error(BonjourRecord record, DNSServiceErrorType error);
-	private slots:
+	private Q_SLOTS:
 		void bonjourSocketReadyRead(int);
 	private:
 		static void DNSSD_API bonjourResolveReply(DNSServiceRef sdRef, DNSServiceFlags flags,

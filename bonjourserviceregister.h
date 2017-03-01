@@ -58,7 +58,7 @@ class BonjourServiceRegister : public QObject {
 		void error(DNSServiceErrorType error);
 		void serviceRegistered(const BonjourRecord &record);
 
-	private slots:
+	private Q_SLOTS:
 		void bonjourSocketReadyRead();
 
 	private:
