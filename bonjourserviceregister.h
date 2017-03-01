@@ -54,7 +54,7 @@ class BonjourServiceRegister : public QObject {
 			return finalRecord;
 		}
 
-	signals:
+	Q_SIGNALS:
 		void error(DNSServiceErrorType error);
 		void serviceRegistered(const BonjourRecord &record);
 

@@ -56,7 +56,7 @@ class BonjourServiceBrowser : public QObject {
 			return browsingType;
 		}
 
-	signals:
+	Q_SIGNALS:
 		void currentBonjourRecordsChanged(const QList<BonjourRecord> &list);
 		void error(DNSServiceErrorType err);
 
