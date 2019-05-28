@@ -43,6 +43,11 @@ class BonjourRecord {
 			registeredType = QString::fromUtf8(regType);
 			replyDomain = QString::fromUtf8(domain);
 		}
+        BonjourRecord(const BonjourRecord & bonjourRecord) {
+            serviceName = bonjourRecord.serviceName;
+            registeredType = bonjourRecord.registeredType;
+            replyDomain = bonjourRecord.replyDomain;
+        }
 		QString serviceName;
 		QString registeredType;
 		QString replyDomain;

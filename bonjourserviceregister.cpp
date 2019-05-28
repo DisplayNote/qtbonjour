@@ -34,41 +34,74 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QtCore/QSocketNotifier>
 #include <QtCore/QtEndian>
 
-BonjourServiceRegister::BonjourServiceRegister(QObject *parent)
-		: QObject(parent), dnssref(0), bonjourSocket(0) {
+BonjourServiceRegister::BonjourServiceRegister(const BonjourRecord &record, quint16 servicePort, int niIndex, QObject *parent) :
+    QObject(parent)
+  , dnssref(nullptr)
+  , m_record(record)
+  , m_servicePort(servicePort)
+  , m_niIndex(niIndex)
+  , m_thread(nullptr)
+{
+    m_thread = new QThread();
+    this->moveToThread(m_thread);
+
+    connect(m_thread, &QThread::started, this, &BonjourServiceRegister::onStarted);
+    connect(m_thread, &QThread::finished, this, &BonjourServiceRegister::deleteLater);
+    connect(m_thread, &QThread::finished, m_thread, &QThread::deleteLater);
 }
 
-BonjourServiceRegister::~BonjourServiceRegister() {
-	if (dnssref) {
-		DNSServiceRefDeallocate(dnssref);
-		dnssref = 0;
-	}
+BonjourServiceRegister::~BonjourServiceRegister()
+{
+    if (dnssref != nullptr) {
+        DNSServiceRefDeallocate(dnssref);
+    }
+    dnssref = nullptr;
 }
 
-void BonjourServiceRegister::registerService(const BonjourRecord &record, quint16 servicePort, int niIndex) {
-	if (dnssref) {
-		qWarning("Warning: Already registered a service for this object, aborting new register");
-		return;
-	}
+void BonjourServiceRegister::registerService()
+{
+    if (m_thread == nullptr) return;
+    m_thread->start();
+}
 
-    quint16 bigEndianPort = servicePort;
+void BonjourServiceRegister::unregisterService()
+{
+    if (m_thread == nullptr) return;
+    m_thread->exit();
+}
+
+BonjourRecord BonjourServiceRegister::registeredRecord() const {
+    return finalRecord;
+}
+
+void BonjourServiceRegister::onStarted()
+{
+    if (dnssref != nullptr)
+    {
+        qWarning("Warning: Already registered a service for this object, aborting new register");
+        return;
+    }
+
+    quint16 bigEndianPort = m_servicePort;
 #if Q_BYTE_ORDER == Q_LITTLE_ENDIAN
-   {
-           bigEndianPort =  0 | ((servicePort & 0x00ff) << 8) | ((servicePort & 0xff00) >> 8);
-   }
+    {
+        bigEndianPort =  0 | ((m_servicePort & 0x00ff) << 8) | ((m_servicePort & 0xff00) >> 8);
+    }
 #endif
 
     //Get TXTRecords from BonjourRecord
     TXTRecordRef txtRecord;
     char * txt = nullptr;
-    if (record.txtRecord.count() > 0) {
+    if (m_record.txtRecord.count() > 0) {
         txt = new char[256];
         TXTRecordCreate(&txtRecord, 256, txt);
-        QMap<QString, QString>::const_iterator txtIt = record.txtRecord.begin();
+        QMap<QString, QString>::const_iterator txtIt = m_record.txtRecord.begin();
         DNSServiceErrorType err = kDNSServiceErr_NoError;
-        while(txtIt != record.txtRecord.end()) {
-            err = TXTRecordSetValue(&txtRecord, txtIt.key().toUtf8().constData(),
-                              txtIt.value().length(), txtIt.value().toUtf8().constData());
+        while(txtIt != m_record.txtRecord.end()) {
+            err = TXTRecordSetValue(&txtRecord,
+                                    txtIt.key().toUtf8().constData(),
+                                    static_cast<uint8_t>(txtIt.value().length()),
+                                    txtIt.value().toUtf8().constData());
 
             if (err != kDNSServiceErr_NoError) {
                 TXTRecordDeallocate(&txtRecord);
@@ -82,52 +115,42 @@ void BonjourServiceRegister::registerService(const BonjourRecord &record, quint1
         }
     }
 
-    DNSServiceErrorType err = DNSServiceRegister(&dnssref, 0, niIndex,
-                              record.serviceName.toUtf8().constData(),
-                              record.registeredType.toUtf8().constData(),
-                              NULL,
-                              NULL,
-                              bigEndianPort,
-                              TXTRecordGetLength(&txtRecord), TXTRecordGetBytesPtr(&txtRecord),
-                              &bonjourRegisterService, this);
+    DNSServiceErrorType err = DNSServiceRegister(&dnssref, 0, static_cast<uint32_t>(m_niIndex),
+                                                 m_record.serviceName.toUtf8().constData(),
+                                                 m_record.registeredType.toUtf8().constData(),
+                                                 nullptr,
+                                                 nullptr,
+                                                 bigEndianPort,
+                                                 TXTRecordGetLength(&txtRecord), TXTRecordGetBytesPtr(&txtRecord),
+                                                 &bonjourRegisterService, this);
+
+    if (txt != nullptr) {
+        TXTRecordDeallocate(&txtRecord);
+        delete[] txt;
+    }
 
     if (err != kDNSServiceErr_NoError) {
         Q_EMIT error(err);
     } else {
-		int sockfd = DNSServiceRefSockFD(dnssref);
-        if (sockfd == -1) {
-			Q_EMIT error(kDNSServiceErr_Invalid);
-		} else {
-			bonjourSocket = new QSocketNotifier(sockfd, QSocketNotifier::Read, this);
-			connect(bonjourSocket, SIGNAL(activated(int)), this, SLOT(bonjourSocketReadyRead()));
-		}
-	}
-
-    TXTRecordDeallocate(&txtRecord);
-    if (txt != nullptr) delete[] txt;
-}
-
-
-void BonjourServiceRegister::bonjourSocketReadyRead() {
-	DNSServiceErrorType err = DNSServiceProcessResult(dnssref);
-    if (err != kDNSServiceErr_NoError) {
-		Q_EMIT error(err);
+        DNSServiceErrorType err = DNSServiceProcessResult(dnssref);
+        if (err != kDNSServiceErr_NoError) {
+            Q_EMIT error(err);
+        }
     }
 }
 
-
 void DNSSD_API BonjourServiceRegister::bonjourRegisterService(DNSServiceRef, DNSServiceFlags,
-        DNSServiceErrorType errorCode, const char *name,
-        const char *regtype, const char *domain,
-        void *context) {
-
+                                                              DNSServiceErrorType errorCode, const char *name,
+                                                              const char *regtype, const char *domain,
+                                                              void *context)
+{
     BonjourServiceRegister *serviceRegister = static_cast<BonjourServiceRegister *>(context);
+    if (serviceRegister == nullptr) return;
+
     if (errorCode != kDNSServiceErr_NoError) {
-		Q_EMIT serviceRegister->error(errorCode);
-	} else {
-		serviceRegister->finalRecord = BonjourRecord(QString::fromUtf8(name),
-		                               QString::fromUtf8(regtype),
-		                               QString::fromUtf8(domain));
-		Q_EMIT serviceRegister->serviceRegistered(serviceRegister->finalRecord);
-	}
+        Q_EMIT serviceRegister->error(errorCode);
+    } else {
+        serviceRegister->finalRecord = BonjourRecord(name, regtype, domain);
+        Q_EMIT serviceRegister->serviceRegistered(serviceRegister->finalRecord);
+    }
 }
