@@ -43,7 +43,6 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QtCore/QObject>
 #include <QThread>
 
-class QSocketNotifier;
 class BonjourServiceRegister : public QObject {
     Q_OBJECT
 public:

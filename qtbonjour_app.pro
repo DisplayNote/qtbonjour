@@ -17,6 +17,7 @@ LIBS += -ldns_sd
 
 SOURCES += \
     main.cpp \
+    bonjourrecord.cpp \
     bonjourservicebrowser.cpp \
     bonjourserviceregister.cpp \
     bonjourserviceresolver.cpp

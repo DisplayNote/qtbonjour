@@ -29,36 +29,25 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 
 // Qt includes
-#include <QtCore/QMetaType>
-#include <QtCore/QString>
-#include <QtCore/QMap>
+#include <QObject>
+#include <QMap>
 
-class BonjourRecord {
-	public:
-		BonjourRecord() {}
-		BonjourRecord(const QString &name, const QString &regType, const QString &domain)
-				: serviceName(name), registeredType(regType), replyDomain(domain) {}
-		BonjourRecord(const char *name, const char *regType, const char *domain) {
-			serviceName = QString::fromUtf8(name);
-			registeredType = QString::fromUtf8(regType);
-			replyDomain = QString::fromUtf8(domain);
-		}
-        BonjourRecord(const BonjourRecord & bonjourRecord) {
-            serviceName = bonjourRecord.serviceName;
-            registeredType = bonjourRecord.registeredType;
-            replyDomain = bonjourRecord.replyDomain;
-        }
-		QString serviceName;
-		QString registeredType;
-		QString replyDomain;
+class BonjourRecord : public QObject {
+    Q_OBJECT
 
-        QMap<QString,QString> txtRecord;
+public:
+    BonjourRecord(QObject * parent = nullptr);
+    BonjourRecord(const QString &name, const QString &regType, const QString &domain, QObject * parent = nullptr);
+    BonjourRecord(const char *name, const char *regType, const char *domain, QObject * parent = nullptr);
+    BonjourRecord(const BonjourRecord & bonjourRecord);
+    ~BonjourRecord();
 
-		bool operator==(const BonjourRecord &other) const {
-			return serviceName == other.serviceName
-			       && registeredType == other.registeredType
-			       && replyDomain == other.replyDomain;
-		}
+    QString serviceName;
+    QString registeredType;
+    QString replyDomain;
+
+    QMap<QString,QString> txtRecord;
+
+    bool operator==(const BonjourRecord &other) const;
+    BonjourRecord operator=(const BonjourRecord &other);
 };
-
-Q_DECLARE_METATYPE(BonjourRecord)
