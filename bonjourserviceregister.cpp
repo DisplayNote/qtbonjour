@@ -52,6 +52,11 @@ BonjourServiceRegister::BonjourServiceRegister(const BonjourRecord &record, quin
 
 BonjourServiceRegister::~BonjourServiceRegister()
 {
+    disconnect(m_thread, &QThread::started, this, &BonjourServiceRegister::onStarted);
+    disconnect(m_thread, &QThread::finished, this, &BonjourServiceRegister::deleteLater);
+
+    unregisterService();
+
     if (dnssref != nullptr) {
         DNSServiceRefDeallocate(dnssref);
     }
@@ -68,6 +73,7 @@ void BonjourServiceRegister::unregisterService()
 {
     if (m_thread == nullptr) return;
     m_thread->exit();
+    m_thread = nullptr;
 }
 
 BonjourRecord BonjourServiceRegister::registeredRecord() const {

@@ -19,14 +19,12 @@ SOURCES += \
     main.cpp \
     bonjourservicebrowser.cpp \
     bonjourserviceregister.cpp \
-    bonjourserviceresolver.cpp \
-    workerexecutor.cpp
+    bonjourserviceresolver.cpp
 
     
 HEADERS += \
     bonjourrecord.h \
     bonjourservicebrowser.h \
     bonjourserviceregister.h \
-    bonjourserviceresolver.h \
-    workerexecutor.h
+    bonjourserviceresolver.h
 

@@ -114,8 +114,6 @@ int main(int argc, char *argv[])
 
     QApplication app(argc, argv);
 
-    qDebug() << Q_FUNC_INFO << QThread::currentThread();
-
     QList<QNetworkInterface> interfaces = getNetworkInterfaces();
     for (QNetworkInterface ni : interfaces) {
         registerRAOPService(ni);
@@ -123,12 +121,13 @@ int main(int argc, char *argv[])
         registerPlaymateService(ni);
     }
 
-    QThread::msleep(10000);
+    // Wait to see if the device see my service
+    QThread::msleep(5000);
 
     Q_FOREACH(BonjourServiceRegister * bonjourService, _registerList) {
         if (bonjourService == nullptr) continue;
         bonjourService->disconnect();
-        bonjourService->unregisterService();
+        bonjourService->deleteLater();
     }
     _registerList.clear();
 
