@@ -32,6 +32,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QObject>
 #include <QMap>
 
+namespace qtbonjour {
 class BonjourRecord : public QObject {
     Q_OBJECT
 
@@ -51,3 +52,4 @@ public:
     bool operator==(const BonjourRecord &other) const;
     BonjourRecord operator=(const BonjourRecord &other);
 };
+} // qtbonjour

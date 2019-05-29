@@ -8,6 +8,8 @@
 #include <QtConcurrent>
 #include "bonjourserviceregister.h"
 
+using namespace dnbonjour;
+
 static QList<BonjourServiceRegister*> _registerList;
 
 static const quint16 servicePort = 7000;

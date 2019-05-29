@@ -32,6 +32,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Qt includes
 #include <QtCore/QSocketNotifier>
 
+using namespace qtbonjour;
+
 BonjourServiceBrowser::BonjourServiceBrowser(QObject *parent)
 		: QObject(parent), dnssref(0), bonjourSocket(0) {
 }

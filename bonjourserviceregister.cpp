@@ -34,6 +34,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QtCore/QSocketNotifier>
 #include <QtCore/QtEndian>
 
+using namespace qtbonjour;
+
 BonjourServiceRegister::BonjourServiceRegister(const BonjourRecord &record, quint16 servicePort, int niIndex, QObject *parent) :
     QObject(parent)
   , dnssref(nullptr)

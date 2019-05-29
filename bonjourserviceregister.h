@@ -43,6 +43,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QtCore/QObject>
 #include <QThread>
 
+namespace qtbonjour {
 class BonjourServiceRegister : public QObject {
     Q_OBJECT
 public:
@@ -76,3 +77,4 @@ private:
 
     QThread * m_thread;
 };
+} // qtbonjour

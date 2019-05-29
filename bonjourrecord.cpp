@@ -1,5 +1,7 @@
 #include "bonjourrecord.h"
 
+using namespace qtbonjour;
+
 namespace {
 static const struct RegisterMetaTypes
 {

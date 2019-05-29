@@ -46,6 +46,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 class QSocketNotifier;
 
+namespace qtbonjour {
 class BonjourServiceResolver : public QObject {
 		Q_OBJECT
 	protected:
@@ -76,3 +77,4 @@ class BonjourServiceResolver : public QObject {
 		        const char *fullName, const char *hosttarget, quint16 port,
 		        quint16 txtLen, const char *txtRecord, void *context);
 };
+} // qtbonjour

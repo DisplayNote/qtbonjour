@@ -43,6 +43,8 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QtCore/QObject>
 
 class QSocketNotifier;
+
+namespace qtbonjour {
 class BonjourServiceBrowser : public QObject {
 		Q_OBJECT
 	public:
@@ -72,3 +74,4 @@ class BonjourServiceBrowser : public QObject {
 		QList<BonjourRecord> bonjourRecords;
 		QString browsingType;
 };
+} // qtbonjour
