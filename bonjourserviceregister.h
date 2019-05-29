@@ -41,33 +41,39 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // Qt includes
 #include <QtCore/QObject>
+#include <QThread>
 
 class QSocketNotifier;
 class BonjourServiceRegister : public QObject {
-		Q_OBJECT
-	public:
-		BonjourServiceRegister(QObject *parent = 0);
-		~BonjourServiceRegister();
+    Q_OBJECT
+public:
+    BonjourServiceRegister(const BonjourRecord &record, quint16 servicePort, int niIndex, QObject *parent = nullptr);
+    ~BonjourServiceRegister();
 
-        void registerService(const BonjourRecord &record, quint16 servicePort, int niIndex);
-		inline BonjourRecord registeredRecord() const {
-			return finalRecord;
-		}
+    void registerService();
+    void unregisterService();
 
-	Q_SIGNALS:
-		void error(DNSServiceErrorType error);
-		void serviceRegistered(const BonjourRecord &record);
+    BonjourRecord registeredRecord() const;
 
-	private Q_SLOTS:
-		void bonjourSocketReadyRead();
+Q_SIGNALS:
+    void error(DNSServiceErrorType error);
+    void serviceRegistered(const BonjourRecord &record);
 
-	private:
-		static void DNSSD_API bonjourRegisterService(DNSServiceRef sdRef, DNSServiceFlags,
-		        DNSServiceErrorType errorCode, const char *name,
-		        const char *regtype, const char *domain,
-		        void *context);
+private Q_SLOTS:
+    void onStarted();
 
-		DNSServiceRef dnssref;
-		QSocketNotifier *bonjourSocket;
-		BonjourRecord finalRecord;
+private:
+    static void DNSSD_API bonjourRegisterService(DNSServiceRef sdRef, DNSServiceFlags,
+                                                 DNSServiceErrorType errorCode, const char *name,
+                                                 const char *regtype, const char *domain,
+                                                 void *context);
+
+    DNSServiceRef dnssref;
+    BonjourRecord finalRecord;
+
+    BonjourRecord m_record;
+    quint16 m_servicePort;
+    int m_niIndex;
+
+    QThread * m_thread;
 };
