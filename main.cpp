@@ -8,7 +8,7 @@
 #include <QtConcurrent>
 #include "bonjourserviceregister.h"
 
-using namespace dnbonjour;
+using namespace qtbonjour;
 
 static QList<BonjourServiceRegister*> _registerList;
 

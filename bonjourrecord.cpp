@@ -38,6 +38,7 @@ BonjourRecord::BonjourRecord(const BonjourRecord & bonjourRecord) :
   , serviceName(bonjourRecord.serviceName)
   , registeredType(bonjourRecord.registeredType)
   , replyDomain(bonjourRecord.replyDomain)
+  , txtRecord(bonjourRecord.txtRecord)
 {
 }
 
@@ -58,6 +59,7 @@ BonjourRecord BonjourRecord::operator=(const BonjourRecord &other)
     serviceName    = other.serviceName;
     registeredType = other.registeredType;
     replyDomain    = other.replyDomain;
+    txtRecord      = other.txtRecord;
 
     return *this;
 }
