@@ -41,8 +41,11 @@ CONFIG(release, debug|release) {
 
 # Installation prefix and library directory
 isEmpty(PREFIX) {
-    linux: PREFIX = install/Linux/$$BUILD_TYPE
+    linux:   PREFIX = install/Linux/$$BUILD_TYPE
     win32:   PREFIX = install/Windows/$$BUILD_TYPE
+    android: PREFIX = install/Android/$$BUILD_TYPE
+    ios:     PREFIX = install/iOS/$$BUILD_TYPE
+    macx:    PREFIX = install/Macos/$$BUILD_TYPE
 }
 
 headers.files = $$HEADERS
