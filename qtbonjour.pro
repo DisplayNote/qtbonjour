@@ -6,10 +6,11 @@ CONFIG += staticlib
 
 TARGET = qtbonjour
 
-win32 {
-INCLUDEPATH += "C:\Program Files\Bonjour SDK\Include"
-LIBS += -LC:\Program Files\Bonjour SDK\Lib\Win32 -ldnssd
-}
+# Qt 6.8 LTS is the floor (AB#141677): anything deprecated up to it fails to build.
+DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060800
+
+# Bonjour SDK (dns_sd.h) for Windows, from Conan.
+include($$PWD/conaninstall.pri)
 
 linux {
 LIBS += -ldns_sd

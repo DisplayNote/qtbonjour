@@ -1,0 +1,49 @@
+trigger:
+  tags:
+    include:
+    - '*'
+
+pr:
+  branches:
+    include:
+    - '*'
+  paths:
+    exclude:
+    - README.md
+    - LICENSE
+  drafts: false
+
+resources:
+  repositories:
+    - repository: ci
+      type: github
+      # Why do not use GITHUB_CONNECTION variable here? https://developercommunity.visualstudio.com/t/allow-variables-at-resourcesrepositoriesrepository/816606
+      endpoint: "DisplayNote through PAT."
+      name: DisplayNote/qt-conan-ci
+      # 2.4.0 builds every stage against Qt 6.8.8 LTS by default (AB#141677):
+      # msvc2022_64 kit on the agent-pool-windows2022-vmss pool. Nothing is
+      # overridden here. Qt 6.5 and 6.8 are not ABI compatible - release under a
+      # new package version rather than rebuilding an existing one.
+      ref: refs/tags/2.4.0
+
+variables:
+  - group: montage-client-environment-variables
+
+stages:
+    - template: common/setup.yml@ci
+
+    # Windows only. Montage consumes qtbonjour on Windows alone (macOS, iOS and
+    # Android use their own mDNS stacks), and every published qtbonjour package
+    # has been Windows x86_64.
+    - template: windows-x86_64/build.yml@ci
+      parameters:
+        projectFile: 'qtbonjour/qtbonjour.pro'
+
+    - template: common/deploy-develop.yml@ci
+      parameters:
+        conanfile: 'qtbonjour/conanfile.py'
+        packageName: 'qtbonjour'
+        stageDependencies: ['setup', 'windows_x86_64']
+        # Still msvc19.* although the stage builds with VS2022: qt-conan-ci keeps
+        # the profile names stable on purpose. Must match conaninstall.pri.
+        conanProfiles: ['msvc19.x86_64']

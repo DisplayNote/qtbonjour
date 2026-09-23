@@ -1,1 +1,14 @@
 qtbonjour.pro.user
+qtbonjour_app.pro.user
+
+# Conan install output (conaninstall.pri)
+conanbuildinfo.*
+conaninfo.txt
+conan.lock
+graph_info.json
+
+# Local build and install trees
+install/
+build*/
+debug/
+release/
