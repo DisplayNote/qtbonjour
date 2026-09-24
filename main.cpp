@@ -108,8 +108,6 @@ void registerPlaymateService(const QNetworkInterface & ni) {
 
 int main(int argc, char *argv[])
 {
-    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-
 #if defined(Q_OS_WIN)
     QCoreApplication::setAttribute(Qt::AA_UseOpenGLES, true);
 #endif
