@@ -8,7 +8,8 @@
 ## DO
 
 - Keep changes small: this is a vendored fork consumed by Montage as a Conan package.
-- Keep `SOURCES`/`HEADERS` identical in `qtbonjour.pro` and `qtbonjour_app.pro`.
+- Keep the shared library `SOURCES`/`HEADERS` in sync between `qtbonjour.pro` and
+  `qtbonjour_app.pro` (only the app project lists `main.cpp`; never add it to the library).
 - Copy every new `BonjourRecord` member in both the copy constructor and `operator=`.
 - Report errors through the existing `error(...)` signals with `DNSServiceErrorType`.
 - Keep the Conan profile names in `conaninstall.pri` and `ci/azure-pipelines.yml` equal.

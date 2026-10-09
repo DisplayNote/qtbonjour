@@ -69,8 +69,9 @@ which must be installed on the machine separately.
 
 ## Active decisions
 
-- Qt 6.8 LTS floor, enforced by `QT_DISABLE_DEPRECATED_BEFORE=0x060800` in both `.pro`
-  files (AB#141677).
+- Qt 6.8 LTS is the documented and CI-verified floor (AB#141677). Both `.pro` files set
+  `QT_DISABLE_DEPRECATED_BEFORE=0x060800`, which disables APIs deprecated before 6.8 but does
+  not reject an older Qt; there is no qmake version guard.
 - Bonjour SDK headers come from Conan rather than a local SDK install, because CI agents
   have none (`conaninstall.pri`).
 - Windows-only CI because Montage consumes qtbonjour on Windows only

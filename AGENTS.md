@@ -84,7 +84,9 @@ Details, data flows and platform support: [docs/architecture.md](docs/architectu
   (`bonjourserviceregister.cpp:89`).
 - Indentation is mixed (tabs in the upstream browser/resolver files, spaces in the
   DisplayNote-written register/record code). Match the file you edit.
-- Each source file keeps the upstream BSD licence header.
+- Preserve the upstream BSD licence header where a file has one (the upstream
+  browser/register/resolver sources); some files, e.g. `bonjourrecord.cpp` and `main.cpp`,
+  have none. Do not add or edit licence headers as a side effect of unrelated changes.
 - Commit style on master: `AB#<work item> <summary>` (e.g. `653fa38`); PRs from
   `feature/<id>_<topic>` branches into `master`.
 
@@ -92,7 +94,9 @@ Details, data flows and platform support: [docs/architecture.md](docs/architectu
 
 - Follow: callback → `static_cast` the `context` pointer → `Q_EMIT` a signal
   (`bonjourservicebrowser.cpp:70-89`, `bonjourserviceresolver.cpp:95-133`).
-- Follow: keep `qtbonjour.pro` and `qtbonjour_app.pro` `SOURCES`/`HEADERS` in sync.
+- Follow: keep the shared library entries of `SOURCES`/`HEADERS` in sync between
+  `qtbonjour.pro` and `qtbonjour_app.pro`. Only `qtbonjour_app.pro` lists `main.cpp`; never
+  add the demo entry point to the library project.
 - Avoid: logging record contents, host names or TXT values (see Security).
 - Avoid: calling `browseForServiceType()` twice on one browser — the previous
   `DNSServiceRef` is overwritten, not deallocated.
