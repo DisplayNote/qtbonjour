@@ -22,8 +22,11 @@ CI and releases
 ---------------
 
 `ci/azure-pipelines.yml` builds with [qt-conan-ci](https://github.com/DisplayNote/qt-conan-ci)
-2.4.0 (Qt 6.8.8, `msvc2022_64`). Only Windows x86_64 is built, as Montage consumes
-qtbonjour on Windows only.
+2.5.0 (Qt 6.8.8, `msvc2022_64`). Only Windows x86_64 is built, as Montage consumes
+qtbonjour on Windows only. Stage order: SecretScan + DependencyScan (in parallel,
+from `DisplayNote/dn-pipeline-templates` v1.1.2, audit mode) → `setup` →
+`tests_coverage` (the `tests/` suite under OpenCppCoverage, audit mode) → the
+Windows build → deploy.
 
 - Pull requests publish `qtbonjour/pr-<number>@dn/develop`.
 - A SemVer tag (e.g. `1.3.0`) builds `qtbonjour/<tag>`; the `qtbonjour` release pipeline
@@ -31,3 +34,29 @@ qtbonjour on Windows only.
 
 Qt 6.5 and 6.8 are not ABI compatible: packages built against Qt 6.8 must use a new
 version, never a rebuild of an existing one (1.2.0 and earlier predate Qt 6.8).
+
+Testing
+-------
+
+The GoogleTest suite lives in `tests/` and runs with coverage in CI. It uses a fake
+dns_sd, so no Bonjour service is needed. See [`docs/testing.md`](docs/testing.md).
+
+Coverage scope
+--------------
+
+The `tests_coverage` stage reports line coverage of the library sources (roadmap
+2.23, target 75%).
+
+- **Measured:** the library's `*.cpp` and `*.h` in the repository root
+  (`bonjourrecord`, `bonjourservicebrowser`, `bonjourserviceresolver`,
+  `bonjourserviceregister`), built for Windows x86_64 Debug.
+- **Excluded:** `tests/` (including the fake dns_sd), the generated `moc_*` files
+  and the Bonjour SDK headers from Conan - the qt-conan-ci default exclusions -
+  plus `main.cpp`, the demo app's entry point (`qtbonjour_app.pro`), listed in
+  `excludedSources`.
+- **Not executed in the current lane:** the Linux (avahi) branches in the headers
+  and `qtbonjour.pro`, the big-endian branch of the port swap in
+  `BonjourServiceRegister::onStarted()`, and its "already registered" guard, which
+  the public API cannot reach.
+
+The exclusions are reviewed quarterly.
