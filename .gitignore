@@ -12,3 +12,6 @@ install/
 build*/
 debug/
 release/
+
+# dn_logscrub placeholder maps hold the ORIGINAL values — never commit them
+*.dnmap
