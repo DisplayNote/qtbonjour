@@ -27,8 +27,8 @@ resources:
       # new package version rather than rebuilding an existing one.
       ref: refs/tags/2.5.0
     # AI Security Roadmap 4.1 — shared secret-scanning (gitleaks) and
-    # dependency-scanning (OSV-Scanner + Grype) templates, pinned to an
-    # immutable tag like qt-conan-ci above.
+    # dependency-scanning (OSV-Scanner + Grype) templates, tracking the main
+    # branch for updates.
     - repository: dn-templates
       type: github
       endpoint: "DisplayNote through PAT."
