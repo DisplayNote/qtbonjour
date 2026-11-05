@@ -8,7 +8,7 @@
   in `DisplayNote/qtbonjour`; Montage consumes it as the Conan package `qtbonjour`
   (Windows x86_64 only — see [docs/architecture.md](docs/architecture.md)).
 - Stack: C++ / Qt 6 (6.8 LTS floor, `QT_DISABLE_DEPRECATED_BEFORE=0x060800`), qmake,
-  Conan 1.x recipe (`conanfile.py`), Azure Pipelines via `qt-conan-ci` 2.4.0 (Qt 6.8.8,
+  Conan 1.x recipe (`conanfile.py`), Azure Pipelines via `qt-conan-ci` 2.5.0 (Qt 6.8.8,
   `msvc2022_64`). Licence: BSD-style, Trenton Schulz 2007 ([LICENSE](LICENSE)).
 
 ## Security
@@ -26,6 +26,15 @@ describe devices on the customer's network (they can embed MAC addresses and dev
 names). Do not add log lines that print them; leave logging decisions to the
 consuming app. See [docs/runbooks/debugging-with-ai.md](docs/runbooks/debugging-with-ai.md).
 
+This repo also carries a mandatory `code-review` agent skill (AI Security Roadmap §4.2) with two
+identical copies — `.agents/skills/code-review/SKILL.md` (Codex, Kiro, and similar agents) and
+`.github/skills/code-review/SKILL.md` (GitHub Copilot) — that runs a pre-PR review and requires
+every AI review to end with a `Security:` line covering injection, hardcoded secrets, insecure
+direct object references, and CVE-affected dependencies. Both copies are generated from the
+`displaynote-engineering` plugin's canonical skill, as are the `log-sanitise` copies next to them;
+do not hand-edit them; land changes in the plugin and re-sync with `/sync-skill code-review` and
+`/sync-skill log-sanitise`.
+
 ## Repository map
 
 Flat layout — every source file is at the repo root.
@@ -42,15 +51,20 @@ Flat layout — every source file is at the repo root.
 | `conanfile.py` | Conan 1.x recipe (requires `bonjoursdk/3.0.0@dn/stable` on Windows; packages `<os>/<BuildType>`) |
 | `qtbonjour.pri` | Legacy include-the-source helper (`-L../qtbonjour -lqtbonjour`); not used by CI or the Conan package |
 | `ci/azure-pipelines.yml` | Azure Pipelines definition (qt-conan-ci templates) |
-| `docs/` | AI-agent docs: [architecture](docs/architecture.md), [runbooks](docs/runbooks/) |
-| `.agents/skills/`, `.github/skills/` | Vendored `log-sanitise` skill (synced from `displaynote-engineering`; do not edit) |
+| `tests/` | GoogleTest + GoogleMock suite against a fake `dns_sd` (`tests/fakes/`); see [docs/testing.md](docs/testing.md) |
+| `docs/` | AI-agent docs: [architecture](docs/architecture.md), [testing](docs/testing.md), [runbooks](docs/runbooks/); `docs/ai/prompts/docs-maintenance.md` is the docs-sync agent's prompt |
+| `.agents/skills/`, `.github/skills/` | Vendored `code-review` and `log-sanitise` skills (synced from `displaynote-engineering`; do not edit); `.github/instructions/` tells Copilot review so |
+| `.github/workflows/` | docs-sync workflows (roadmap 2.30): `docs-sync.yml` nightly, `docs-catchup.yml` weekly and on demand |
+| `tools/docs-sync/` | docs-sync pack: agent runner, PR opener, `docs_freshness.py` coverage/freshness metric; see its [README](tools/docs-sync/README.md) |
+| `.docs-sync.json` | docs-sync manifest: module → doc → source files |
 
 ## Run / build / test / lint
 
 - Build: see [docs/runbooks/local-setup.md](docs/runbooks/local-setup.md) (Windows/MSVC
   with Conan is the only CI-verified path).
-- Tests: there are none (no test project, no CI test stage). Manual check: build and run
-  the demo app (`qtbonjour_app.pro`) — see the local-setup runbook.
+- Tests: `tests/qtbonjourtests.pro` (GoogleTest + GoogleMock), run by CI under coverage in the
+  `tests_coverage` stage — see [docs/testing.md](docs/testing.md). The demo app
+  (`qtbonjour_app.pro`) is a manual check, not a test.
 - Lint/format: none configured.
 - Release: tag-driven, documented in [README.md](README.md#ci-and-releases).
 
@@ -127,6 +141,9 @@ Details, data flows and platform support: [docs/architecture.md](docs/architectu
   (`bonjourserviceresolver.cpp:118-123`).
 - `BonjourServiceRegister` signals are emitted from its worker thread; connect with
   queued or auto connections.
+- Every library source file sits flat at the repo root, so `.docs-sync.json` maps each module
+  doc to source **files**, not folders. A new source file must be added to the module it belongs
+  to, or the nightly docs-sync freshness metric won't see changes to it.
 - `qtbonjour.pri` adds `-ldns_sd` on every non-mac platform, which is wrong on Windows
   (`dnssd`); it is not part of the CI/Conan path.
 - The demo app's `main.cpp` contains sample AirPlay TXT values (`pk`, `pi`); they are
@@ -151,6 +168,8 @@ Details, data flows and platform support: [docs/architecture.md](docs/architectu
 | Bonjour SDK (`bonjoursdk/3.0.0@dn/stable`) | `dns_sd.h` and `dnssd` import library on Windows | `conanfile.py`, `conaninstall.pri` |
 | mDNS daemon | Does the actual multicast traffic; must be running on the host | Outside the repo (OS / Bonjour service install) |
 | DisplayNote Conan remote `dn` | Hosts `bonjoursdk` and the published `qtbonjour` packages | Conan client config / qt-conan-ci |
-| Azure Pipelines + qt-conan-ci 2.4.0 | Build, version and publish | `ci/azure-pipelines.yml` (variable group `montage-client-environment-variables`) |
+| Azure Pipelines + qt-conan-ci 2.5.0 | Build, version, tests under coverage and publish | `ci/azure-pipelines.yml` (variable group `montage-client-environment-variables`) |
+| GitHub Actions | docs-sync workflows (roadmap 2.30): `docs-sync.yml` nightly and `docs-catchup.yml` weekly (Mon 05:00 UTC) and on demand, each opening one documentation PR against `master`. Not a build gate (Azure Pipelines is) | `.github/workflows/`, [tools/docs-sync/README.md](tools/docs-sync/README.md) |
 
-There are no tests, so nothing is mocked.
+In tests the DNS-SD client library is replaced by `tests/fakes/fake_dns_sd.cpp` (see
+[docs/testing.md](docs/testing.md)).
