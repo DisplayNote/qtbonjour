@@ -1,0 +1,25 @@
+{
+  "_comment": "Per-repo manifest for roadmap 2.30. The docs-sync agent maintains the `modules` list; docs_freshness.py reads it to compute coverage + freshness. Each module maps one doc file to the code path(s) it documents. This is DisplayNote's qtbonjour fork (branch master): every library source file sits flat at the repo root, so modules list files rather than folders.",
+  "docs_root": "docs",
+  "coverage_target": 0.80,
+  "freshness_max_lag_days": 30,
+  "min_doc_bytes": 400,
+  "ignore_code_globs": ["**/*.md"],
+  "modules": [
+    { "name": "library", "doc": "docs/architecture.md", "code_paths": [
+      "bonjourrecord.h", "bonjourrecord.cpp",
+      "bonjourservicebrowser.h", "bonjourservicebrowser.cpp",
+      "bonjourserviceregister.h", "bonjourserviceregister.cpp",
+      "bonjourserviceresolver.h", "bonjourserviceresolver.cpp",
+      "qtbonjour.pri"
+    ] },
+    { "name": "build-packaging", "doc": "docs/runbooks/local-setup.md", "code_paths": [
+      "qtbonjour.pro", "qtbonjour_app.pro", "main.cpp",
+      "conanfile.py", "conaninstall.pri",
+      "ci/azure-pipelines.yml"
+    ] },
+    { "name": "tests", "doc": "docs/testing.md", "code_paths": [
+      "tests"
+    ] }
+  ]
+}
