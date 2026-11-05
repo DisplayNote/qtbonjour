@@ -8,7 +8,7 @@
   in `DisplayNote/qtbonjour`; Montage consumes it as the Conan package `qtbonjour`
   (Windows x86_64 only — see [docs/architecture.md](docs/architecture.md)).
 - Stack: C++ / Qt 6 (6.8 LTS floor, `QT_DISABLE_DEPRECATED_BEFORE=0x060800`), qmake,
-  Conan 1.x recipe (`conanfile.py`), Azure Pipelines via `qt-conan-ci` 2.4.0 (Qt 6.8.8,
+  Conan 1.x recipe (`conanfile.py`), Azure Pipelines via `qt-conan-ci` 2.8.1 (Qt 6.8.8,
   `msvc2022_64`). Licence: BSD-style, Trenton Schulz 2007 ([LICENSE](LICENSE)).
 
 ## Security
@@ -151,6 +151,6 @@ Details, data flows and platform support: [docs/architecture.md](docs/architectu
 | Bonjour SDK (`bonjoursdk/3.0.0@dn/stable`) | `dns_sd.h` and `dnssd` import library on Windows | `conanfile.py`, `conaninstall.pri` |
 | mDNS daemon | Does the actual multicast traffic; must be running on the host | Outside the repo (OS / Bonjour service install) |
 | DisplayNote Conan remote `dn` | Hosts `bonjoursdk` and the published `qtbonjour` packages | Conan client config / qt-conan-ci |
-| Azure Pipelines + qt-conan-ci 2.4.0 | Build, version and publish | `ci/azure-pipelines.yml` (variable group `montage-client-environment-variables`) |
+| Azure Pipelines + qt-conan-ci 2.8.1 | Build, version and publish | `ci/azure-pipelines.yml` (variable group `montage-client-environment-variables`) |
 
 There are no tests, so nothing is mocked.

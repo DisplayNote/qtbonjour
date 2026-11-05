@@ -64,7 +64,7 @@ The suite takes well under a second.
 ## In CI
 
 `ci/azure-pipelines.yml` runs the suite in the `tests_coverage` stage
-(`windows-x86_64/coverage.yml@ci`, qt-conan-ci 2.5.0, roadmap 2.23). The stage:
+(`windows-x86_64/coverage.yml@ci`, qt-conan-ci 2.8.1, roadmap 2.23). The stage:
 
 1. builds the library and then the tests in Debug;
 2. runs `qtbonjourtests.exe` under OpenCppCoverage;

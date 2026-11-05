@@ -22,7 +22,7 @@ CI and releases
 ---------------
 
 `ci/azure-pipelines.yml` builds with [qt-conan-ci](https://github.com/DisplayNote/qt-conan-ci)
-2.5.0 (Qt 6.8.8, `msvc2022_64`). Only Windows x86_64 is built, as Montage consumes
+2.8.1 (Qt 6.8.8, `msvc2022_64`). Only Windows x86_64 is built, as Montage consumes
 qtbonjour on Windows only. Stage order: SecretScan + DependencyScan (in parallel,
 from `DisplayNote/dn-pipeline-templates` v1.1.2, blocking: a finding fails the
 stage, so the stages that depend on it don't run) → `setup` →
