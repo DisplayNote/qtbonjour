@@ -25,6 +25,10 @@ churn for the sake of churn.
    `CLAUDE.md`; the docs root (`docs/`) with `architecture.md`,
    `modules/`, `runbooks/`, `glossary.md`; `.docs-sync.json`. If less than half
    exist, STOP and report that the repo needs the 1.19 bootstrap first.
+   (In this repo there is no `docs/modules/` or `docs/glossary.md`, by design:
+   the library is small and flat, so `.docs-sync.json` maps each module straight
+   to `docs/architecture.md`, `docs/testing.md` or a runbook. Their absence is
+   not drift; follow the manifest's `doc` paths.)
 2. **Establish the baseline.** `DOC_HEAD = git log -1 --format=%H -- AGENTS.md
    CLAUDE.md docs`. Everything changed since `DOC_HEAD` is in scope.
 3. **Enumerate code changes since `DOC_HEAD`** and bucket them: added/new
@@ -44,8 +48,9 @@ churn for the sake of churn.
 
 For each non-no-op row, make the smallest edit that brings the doc back in sync:
 
-- **New module** → add a row to the repository map, create
-  `<docs_root>/modules/<module>.md` from the existing per-module template,
+- **New module** → add a row to the repository map, document it in the doc
+  its `.docs-sync.json` entry points at (in this repo, normally a new section
+  of `docs/architecture.md`; do not create `docs/modules/` for it),
   update the Mermaid architecture diagram, add a "Where to add X" entry if
   relevant, and **add a matching entry to `.docs-sync.json`** (`name`, `doc`,
   `code_paths`).
