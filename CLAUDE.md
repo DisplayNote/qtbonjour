@@ -14,6 +14,7 @@
 - Report errors through the existing `error(...)` signals with `DNSServiceErrorType`.
 - Keep the Conan profile names in `conaninstall.pri` and `ci/azure-pipelines.yml` equal.
 - Release a Qt 6.8 build under a new version (Qt 6.5/6.8 ABI break — see README).
+- When adding a source file, also add it to the right module in `.docs-sync.json`.
 - Before debugging any log, run `/log-sanitise <file…>` and read only the
   `*.scrubbed.*` copy ([docs/runbooks/debugging-with-ai.md](docs/runbooks/debugging-with-ai.md)).
 
@@ -21,7 +22,7 @@
 
 - Don't log service names, host names, TXT values or anything from a `BonjourRecord`.
 - Don't edit `.agents/skills/` or `.github/skills/` — they are synced from the
-  `displaynote-engineering` plugin (`/sync-skill log-sanitise`).
+  `displaynote-engineering` plugin (`/sync-skill code-review`, `/sync-skill log-sanitise`).
 - Don't run qmake/Conan unless asked: qmake triggers `conan install` against the `dn`
   remote (`conaninstall.pri`).
 - Don't assume non-Windows builds work: CI builds Windows x86_64 only.
