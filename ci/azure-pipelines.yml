@@ -18,20 +18,21 @@ resources:
     - repository: ci
       type: github
       # Why do not use GITHUB_CONNECTION variable here? https://developercommunity.visualstudio.com/t/allow-variables-at-resourcesrepositoriesrepository/816606
-      endpoint: "DisplayNote through PAT."
+      endpoint: "DisplayNote"
       name: DisplayNote/qt-conan-ci
       # 2.5.0 adds the tests + coverage stage (roadmap 2.23). Like 2.4.0 it
       # builds every stage against Qt 6.8.8 LTS by default (AB#141677):
       # msvc2022_64 kit on the agent-pool-windows2022-vmss pool. Nothing is
       # overridden here. Qt 6.5 and 6.8 are not ABI compatible - release under a
       # new package version rather than rebuilding an existing one.
-      ref: refs/tags/2.5.0
+      # 2.8.1 keeps 2.8.0's templates; only its examples moved to the DisplayNote GitHub App connection.
+      ref: refs/tags/2.8.1
     # AI Security Roadmap 4.1 — shared secret-scanning (gitleaks) and
     # dependency-scanning (OSV-Scanner + Grype) templates, tracking the main
     # branch for updates.
     - repository: dn-templates
       type: github
-      endpoint: "DisplayNote through PAT."
+      endpoint: "DisplayNote"
       name: DisplayNote/dn-pipeline-templates
       ref: refs/heads/main
 
